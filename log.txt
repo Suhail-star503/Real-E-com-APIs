@@ -1,0 +1,11 @@
+Fri Jan 10 2025 16:43:24 GMT+0530 (India Standard Time). Log Data: [object Object]
+ Fri Jan 10 2025 16:48:07 GMT+0530 (India Standard Time) - /api/user/signup - {"name":"suhal","email":"suhail@gmail.com","password":"123","type":"seller"}
+ Fri Jan 10 2025 16:49:31 GMT+0530 (India Standard Time) - /api/user/login - {"email":"suhail@gmail.com","password":"123"}
+ Fri Jan 10 2025 16:50:05 GMT+0530 (India Standard Time) - /api/product - {"email":"suhail@gmail.com","password":"123"}
+ Fri Jan 10 2025 16:50:33 GMT+0530 (India Standard Time) - /api/user/login - {"email":"suhail@gmail.com","password":"123"}
+ Fri Jan 10 2025 16:51:07 GMT+0530 (India Standard Time) - /api/product - {"email":"suhail@gmail.com","password":"123"}
+ Fri Jan 10 2025 16:51:24 GMT+0530 (India Standard Time) - /api/product - {}
+ Sat Jan 11 2025 16:49:52 GMT+0530 (India Standard Time) - /api/user/signup - {"name":"suhail","email":"suhail@gmail.com","password":"123","type":"seller"}
+ Sat Jan 11 2025 16:53:19 GMT+0530 (India Standard Time) - /api/user/login - {"email":"suhail@gmail.com","password":"123"}
+ Sat Jan 11 2025 16:53:50 GMT+0530 (India Standard Time) - /api/user/signup - {"name":"suhail","email":"suhail@gmail.com","password":"123","type":"seller"}
+ Sat Jan 11 2025 16:54:35 GMT+0530 (India Standard Time) - /api/user/login - {"email":"suhail@gmail.com","password":"123"}
