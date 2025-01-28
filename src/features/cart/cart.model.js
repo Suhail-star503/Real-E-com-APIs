@@ -1,34 +1,60 @@
+import { getdb } from "../../config/mongodb.js";
+import { ObjectId } from "mongodb";
 export default class cartmodel {
-    constructor(productID, userID, quantity, id) {
+    constructor(productID, userID, quantity,id) {
         this.productID = productID;
         this.userID = userID;
         this.quantity = quantity;
-        this.id = id;
+        this._id=id;
+        
     }
-    static add(productID, userID, quantity) {
-        const cartItem = new cartmodel(
-            productID,
-            userID,
-            quantity
-        );
-        cartItem.id = cartItems.length + 1;
-        cartItems.push(cartItem);
-        return cartItem;
+    static async add(productID, userID, quantity) {
+        try {
+            let cartItem = new cartmodel(productID, userID, quantity);
+            const db = getdb();
+            const result = await db.collection("cart");
+            // result.insertOne(cartItem);
+            // return true;
+
+            await result.updateOne(
+                {productID:productID,userID:userID},
+                {
+                    $inc:{quantity:quantity}
+                },
+                {upsert:true}
+            )
+           return true;
+
+        } catch (err) {
+            console.log(err);
+        }
     }
-    static getitem(userID) {
-        return cartItems.filter(
-            (i) => i.userID == userID
-        );
+    static async getitem(userID) {
+        try {
+            
+            const db = getdb();
+            const result = await db.collection("cart");
+            const items=await result.find({userID:userID}).toArray();
+            if(items.length==0){
+                return null;
+            }
+            return items;
+
+
+        } catch (err) {
+            console.log(err);
+        }
     }
-    static delete(cartItemID, userID) {
-        const cartItemIndex = cartItems.findIndex(
-            (i) =>
-                i.id == cartItemID && i.userID == userID
-        );
-        if (cartItemIndex == -1) {
-            return 'Item not found';
-        } else {
-            cartItems.splice(cartItemIndex, 1);
+    static async delete(cartItemID, userID) {
+        try {
+            const db = getdb();
+            const result = await db.collection("cart");
+            
+            await result.deleteOne({ _id: new ObjectId(cartItemID), userID: userID });
+            return true;
+        } catch (err) {
+            console.log(err);
+            return false;
         }
     }
 }

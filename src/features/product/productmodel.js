@@ -1,76 +1,134 @@
+
 import usermodel from "../user/user.model.js";
+import { getdb } from "../../config/mongodb.js";
+import { ObjectId } from "mongodb";
+
 export default class productmodel {
-    constructor(id, name, prize, img, description) {
-        this.id = id;
+    constructor(name, prize, img, description) {
+
         this.name = name;
         this.prize = prize;
         this.img = img;
         this.description = description;
     }
-    static getall() {
-        return products;
-    }
-    static getone(id) {
-        
-        return products.find(p => p.id == id);
-    }
-    static addproduct(product) {
-        products.push(product);
 
-    }
-    static filterproduct(minprize, maxprize) {
-        let result = products.filter(p => p.prize >= minprize && p.prize <= maxprize);
-        return result;
-    }
-    static rateproduct(userID, productID, rating) {
-        const user = usermodel.getalluser().find(
-            (u) => u.id == userID
-        );
-        if (!user) {
-            return 'User not found';
+    static async getall() {
+        try {
+            const db = getdb();
+            const collection = db.collection("products");
+            let products = await collection.find().toArray(); // Convert cursor to an array
+            return products;
+        } catch (error) {
+            throw new Error("Something went wrong");
         }
-        // Validate Product
-        const product = products.find(
-            (p) => p.id == productID
-        );
-        if (!product) {
-            return 'Product not found';
+    }
+
+    static async get(id) {
+        try {
+            const db = getdb();
+            const collection = db.collection("products");
+            let product = await collection.findOne({ _id: new ObjectId(id) }); // Use 'new' keyword
+            return product;
+        } catch (error) {
+            return null;
         }
-        // 2. Check if there are any ratings and if not then add ratings
-        
-            if(!product.ratings) {
-            product.ratings = [];
-            product.ratings.push({
-                userID: userID,
-                rating: rating,
+    }
+
+    static async addproduct(product) {
+        try {
+            const db = getdb();
+            const collection = db.collection("products");
+            await collection.insertOne(product);
+            return product;
+        } catch (error) {
+            throw new Error("Something went wrong");
+        }
+    }
+
+    static async filterproduct(minprize, maxprize) {
+        try {
+            const db = getdb();
+            const collection = db.collection("products");
+            let products = await collection.find({
+                prize: { $gte: minprize, $lte: maxprize }
+            }).toArray();
+            return products;
+        } catch (error) {
+            return null;
+        }
+    }
+    
+
+    static async rateproduct(userID, productID, rating) {
+        try {
+            const db = getdb();
+            const collection = db.collection("users");
+            let user = await collection.findOne({
+                _id: new ObjectId(userID)
             });
-        } else {
-            // 3. check if user rating is already available.
+            if (!user) {
+                return 'User not found';
+            }
+
+            const collection1 = db.collection("products");
+            let product = await collection1.findOne({
+                _id: new ObjectId(productID)
+            });
+            if (!product) {
+                return 'Product not found';
+            }
+
+            if (!product.ratings) {
+                product.ratings = [];
+            }
+            
+
+
+            
             const existingRatingIndex = product.ratings.findIndex(
                 (r) => r.userID == userID
             );
+
             if (existingRatingIndex >= 0) {
-                product.ratings[existingRatingIndex] = {
-                    userID: userID,
-                    rating: rating,
-                };
+                // If a rating from the same user exists, update it
+                await collection1.updateOne(
+                    { _id: new ObjectId(productID), "ratings.userID": userID },
+                    { $set: { "ratings.$.rating": rating } }
+
+
+
+                );
             } else {
-                // 4. if no existing rating, then add new rating.
-                product.ratings.push({
-                    userID: userID,
-                    rating: rating,
-                });
+                // If no existing rating, then add new rating
+                await collection1.updateOne(
+                    { _id: new ObjectId(productID) },
+                    { $push: { ratings: { userID, rating } } }
+                );
             }
+
+            return 'Rating updated successfully';
+
+        } catch (error) {
+            console.error(error);
+            return 'Internal Server Error';
         }
     }
+
+
+
+    
+    
+    
+    
+    
 
 }
 
 
 var products = [
-    new productmodel(1, 'Shirt', 200, 'https://m.media-amazon.com/images/I/81hjyJJ6lpL._AC_SY445_.jpg', 'This is the shirt for man'),
-    new productmodel(2, 'Pant', 300, 'https://m.media-amazon.com/images/I/71n4aYYXM-L._AC_SY445_.jpg', 'this is the pant for man'),
-    new productmodel(3, 'Shoes', 400, 'https://m.media-amazon.com/images/I/711lA5rk08L._AC_SY395_.jpg', 'This is the shoes for man'),
-    new productmodel(4, 'watch', 500, 'https://m.media-amazon.com/images/I/71kzslUzjHL._AC_SY500_.jpg', 'This is the watch for man'),
-    new productmodel(5, 'Belt', 200, 'https://m.media-amazon.com/images/I/81inmnspZML._AC_SY445_.jpg', "this is the belt for man")
-]
+    new productmodel("Shirt", 200, 'https://m.media-amazon.com/images/I/81hjyJJ6lpL._AC_SY445_.jpg', 'This is the shirt for man', new ObjectId()),
+    new productmodel("Pant", 300, 'https://m.media-amazon.com/images/I/71n4aYYXM-L._AC_SY445_.jpg', 'this is the pant for man', new ObjectId()),
+    new productmodel("Shoes", 400, 'https://m.media-amazon.com/images/I/711lA5rk08L._AC_SY395_.jpg', 'This is the shoes for man', new ObjectId()),
+    new productmodel("watch", 500, 'https://m.media-amazon.com/images/I/71kzslUzjHL._AC_SY500_.jpg', 'This is the watch for man', new ObjectId()),
+    new productmodel("Belt", 200, 'https://m.media-amazon.com/images/I/81inmnspZML._AC_SY445_.jpg', "this is the belt for man", new ObjectId())
+];
