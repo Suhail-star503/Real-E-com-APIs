@@ -12,6 +12,7 @@ import swagger from 'swagger-ui-express';
 import loggerMiddleware from './src/middleware/log.middle.js'
 import apiDocs from './src/middleware/swagger.json' with { type: "json" };
 import connectToMongoDB from './src/config/mongodb.js';
+import connecttomongoose from './src/config/mongoos.config.js';
 
 
 let server = express();
@@ -48,7 +49,7 @@ server.use((req, res) => {
 
 server.listen(process.env.PORT, () => {
     console.log('server is listing on 3000 port');
-    connectToMongoDB();
+    connecttomongoose();
 })
 
 

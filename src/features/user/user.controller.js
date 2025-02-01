@@ -1,17 +1,17 @@
 // import env from 'dotenv';
 // env.config();
-import usermodel from "./user.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
-import { ObjectId } from "mongodb";
+import userrepository from "./user.mongoos.repository.js";
 
 export default class usercontroller {
     static async signup(req, res) {
         try {
             const { name, email, password, type } = req.body;
             const hashpass = await bcrypt.hash(password, 12);
-            let user = new usermodel(name, email, hashpass, type);
-            let user1 = await usermodel.signup(user);
+            
+            let newuser = { name, email, password: hashpass, type };
+            let user1 = await userrepository.signup(newuser);
             return res.status(201).send(user1);
         } catch (error) {
             return res.status(500).send("Error signing up user");
@@ -21,11 +21,11 @@ export default class usercontroller {
     static async login(req, res) {
         try {
             const { email, password } = req.body;
-            const user = await usermodel.getbyemail(email);
+            const user = await userrepository.getbyemail1(email);
             if (!user) {
                 return res.status(400).send("User not found");
             }
-            const result = await usermodel.login(email, password);
+            const result = await userrepository.login(email, password);
             if (!result) {
                 return res.status(401).send("Incorrect password");
             } else {
@@ -45,8 +45,5 @@ export default class usercontroller {
             return res.status(500).send("Error logging in user");
         }
     }
+    
 }
-
-
-
-
